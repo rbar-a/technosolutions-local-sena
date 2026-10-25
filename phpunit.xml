@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="false" testdox="true">
+  <testsuites><testsuite name="TechnoSolutions"><directory suffix="Test.php">tests</directory></testsuite></testsuites>
+</phpunit>

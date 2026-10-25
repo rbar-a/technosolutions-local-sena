@@ -1,0 +1,9 @@
+<?php
+// Copia este archivo como config/local.php y ajusta los valores. NO se sube a Git.
+return [
+    'host' => '127.0.0.1',
+    'port' => 3306,
+    'user' => 'ts_app',
+    'pass' => 'CAMBIA_ESTA_CLAVE',
+    'name' => 'technosolutions_db',
+];

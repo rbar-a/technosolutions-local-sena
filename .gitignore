@@ -1,0 +1,12 @@
+venv/
+.git/
+diagnostico.php
+config/local.php
+.env
+*.log
+.phpunit.result.cache
+*.bak
+respaldos_technosolutions/
+__pycache__/
+*.pyc
+.DS_Store
