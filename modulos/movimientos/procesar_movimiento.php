@@ -26,16 +26,6 @@ if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     exit();
 }
 
-// Control de acceso: solo administradores pueden registrar entradas.
-if (
-    ($_SERVER['REQUEST_METHOD'] === 'POST') &&
-    (($_POST['tipo'] ?? '') === 'entrada') &&
-    ((int)($_SESSION['rol'] ?? 0) !== 1)
-) {
-    header('Location: entrada.php?error=sin_permiso');
-    exit();
-}
-
 // ── RECIBIR DATOS ────────────────────────────────────────────────────────────
 $tipo        = $_POST['tipo'] ?? '';     // 'entrada', 'salida' o 'traslado'
 

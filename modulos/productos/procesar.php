@@ -33,8 +33,8 @@ $precio       = floatval($_POST['precio']); // floatval convierte a número deci
 $stock_minimo = intval($_POST['stock_minimo']); // intval convierte a número entero
 
 // Arrays del stock inicial por bodega
-$bodega_ids = $_POST['bodega_id']; // Array con IDs de bodegas
-$stocks     = $_POST['stock'];      // Array con cantidades
+$bodega_ids = $_POST['bodega_id'] ?? []; // Array con IDs de bodegas (vacío al editar)
+$stocks     = $_POST['stock'] ?? [];      // Array con cantidades (vacío al editar)
 
 // ── VALIDACIONES BÁSICAS ─────────────────────────────────────────────────────
 // Verificamos que los campos obligatorios no estén vacíos

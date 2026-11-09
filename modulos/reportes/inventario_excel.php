@@ -43,13 +43,21 @@ $datos = [
     'productos' => $productos
 ];
 
-$json_temp  = sys_get_temp_dir() . '/inventario_' . time() . '.json';
-$excel_temp = sys_get_temp_dir() . '/inventario_' . time() . '.xlsx';
+$id_temp   = uniqid();
+$json_temp = sys_get_temp_dir() . '/inventario_' . $id_temp . '.json';
+$excel_temp = sys_get_temp_dir() . '/inventario_' . $id_temp . '.xlsx';
 
 file_put_contents($json_temp, json_encode($datos, JSON_UNESCAPED_UNICODE));
 
 $script_python = __DIR__ . '/../../python/reporte_excel.py';
-$cmd = "python3 " .
+// Localiza Python 3 en Linux o Windows (ver config/python.php)
+require_once __DIR__ . '/../../config/python.php';
+$python = ts_python_comando();
+if($python === null){
+    http_response_code(500);
+    die('No se encontró Python 3. Instálelo (y las librerías reportlab y openpyxl) o defina la variable PYTHON_BIN.');
+}
+$cmd = $python . " " .
        escapeshellarg($script_python) . " " .
        escapeshellarg($json_temp)     . " " .
        escapeshellarg($excel_temp);

@@ -6,7 +6,7 @@ class MovimientosTest extends BaseTest
 
     public function test_TC01_entrada_crea_stock_en_bodega_sin_registro_previo(): void
     {
-        $r = $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>10,'id_bodega_destino'=>1], $this->sesion(1));
+        $r = $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>10,'id_bodega_destino'=>1], $this->sesion(3));
         $this->assertSame('entrada.php?exito=1', $r['location']);
         $this->assertSame(10, $this->stock(1, 1));
         $this->assertSame(1, $this->contar('movimientos'));
@@ -15,7 +15,7 @@ class MovimientosTest extends BaseTest
     public function test_TC02_entrada_suma_a_stock_existente(): void
     {
         $this->setStock(1, 1, 7);
-        $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>5,'id_bodega_destino'=>1], $this->sesion(1));
+        $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>5,'id_bodega_destino'=>1], $this->sesion(3));
         $this->assertSame(12, $this->stock(1, 1));
     }
 
@@ -79,7 +79,7 @@ class MovimientosTest extends BaseTest
     /** @dataProvider cantidadesInvalidas */
     public function test_TC10_cantidad_cero_o_negativa_se_rechaza($cantidad): void
     {
-        $r = $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>$cantidad,'id_bodega_destino'=>1], $this->sesion(1));
+        $r = $this->request(self::SCRIPT, 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>$cantidad,'id_bodega_destino'=>1], $this->sesion(3));
         $this->assertSame('entrada.php?error=campos_vacios', $r['location']);
         $this->assertSame(0, $this->contar('movimientos'));
     }

@@ -11,9 +11,16 @@
 | 7 | `prueba_humo.sh`, `respaldo.sh` | Prueba de humo de solo lectura y respaldo de base y archivos (excluye `config/local.php`). | Verificación rápida y copia de seguridad. |
 | 8 | `modulos/movimientos/procesar_movimiento.php` | Se rechaza un tipo de movimiento desconocido (lista blanca: entrada, salida, traslado). | Corrige el hallazgo H01 (página en blanco y redirección arbitraria). |
 | 9 | `modulos/dashboard.php` | La fecha se muestra en español. | La fecha aparecía en inglés. |
+| 10 | `config/python.php`, `modulos/reportes/inventario_pdf.php`, `inventario_excel.php` | Python se localiza según el sistema (`python3` en Linux; `py -3` o `python` en Windows) en lugar de escribir `python3` fijo. Los archivos temporales de los reportes usan nombre único. | Que los reportes funcionen en Windows y que dos descargas simultáneas no se pisen. |
+| 11 | `tools/instalar_bd.php`, `instalar_windows.bat`, `iniciar_windows.bat`, `LEEME_WINDOWS.md`, `.gitattributes` | Instalador de base de datos independiente del sistema operativo y lanzadores para Windows (XAMPP). `.gitattributes` fija los saltos de línea (LF en `.sh`, CRLF en `.bat`). | Ejecutar el proyecto en local también en Windows. |
+| 12 | `modulos/productos/procesar.php` | Al editar un producto ya no se generan avisos de PHP por campos de stock inexistentes. | Depuración: avisos "Undefined array key" en cada edición. |
+| 13 | `modulos/productos/lista.php` | Los botones Nuevo Producto y Editar solo se muestran al Administrador; los demás roles ven "Solo consulta". | Los botones aparecían a roles sin permiso y el servidor los rechazaba. |
+| 14 | `database/schema.sql`, `database/seed_demo.sql.tpl`, instaladores | Se agregó `roles.descripcion` (la usa `usuarios/crear.php`); los instaladores la agregan a bases antiguas. | Depuración: aviso "Undefined array key descripcion" en el formulario de usuarios. |
+| 15 | `produccion_opcional/` | `Procfile` y `.railway.json` salen de la raíz. | El proyecto se entrega para ejecución local. |
+| 16 | `iniciar_demo.sh`, `iniciar_windows.bat` | Se inicia PHP con `expose_php=0` (no revela la tecnología en las cabeceras). | Endurecimiento básico. |
 
 ## Pendiente (decisión del equipo, no se modificó)
 - **H02:** un Vendedor puede registrar entradas; el servidor no valida el rol en ese script. Requiere definir la regla de negocio.
 - Acciones por GET sin token anti-CSRF (desactivar usuario, eliminar producto).
-- Los botones Nuevo Producto y Editar se muestran a roles sin permiso (el servidor los bloquea).
 - El servidor integrado de PHP (`php -S`) es apto para demostración local, no para producción.
+- Los archivos `.bat` de Windows no se ejecutaron en un equipo Windows (la lógica de base de datos y la detección de Python sí se probaron en Linux).

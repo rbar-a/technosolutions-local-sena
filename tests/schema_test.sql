@@ -2,7 +2,8 @@
 DROP TABLE IF EXISTS movimientos, stock_bodega, productos, bodegas, usuarios, roles;
 CREATE TABLE IF NOT EXISTS roles (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(50) NOT NULL
+  nombre VARCHAR(50) NOT NULL,
+  descripcion VARCHAR(150) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS usuarios (

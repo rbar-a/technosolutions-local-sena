@@ -224,9 +224,11 @@ $productos = $stmt->get_result();
             <small class="text-muted">Gestión del catálogo de productos</small>
         </div>
         <!-- Botón para ir a crear un producto nuevo -->
+        <?php if($_SESSION['rol'] == 1): ?>
         <a href="crear.php" class="btn btn-primary">
             <i class="bi bi-plus-lg me-2"></i>Nuevo Producto
         </a>
+        <?php endif; ?>
     </div>
 
     <div class="p-4">
@@ -362,11 +364,15 @@ $productos = $stmt->get_result();
                             </td>
                             <td class="text-center">
                                 <!-- Botón editar -->
+                                <?php if($_SESSION['rol'] == 1): ?>
                                 <a href="editar.php?id=<?php echo $p['id']; ?>"
                                    class="btn btn-sm btn-outline-primary me-1"
                                    title="Editar producto">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <?php else: ?>
+                                <span class="text-muted small">Solo consulta</span>
+                                <?php endif; ?>
                                 <!-- Botón desactivar (solo para administradores) -->
                                 <?php if($_SESSION['rol'] == 1): ?>
                                 <button onclick="confirmarEliminar(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['nombre']); ?>')"

@@ -1,5 +1,8 @@
 -- Datos de demostración. Los marcadores __...__ los reemplaza instalar_linux_mint.sh (correos y hashes de contraseña).
-INSERT IGNORE INTO roles (id, nombre) VALUES (1,'Administrador'),(2,'Vendedor'),(3,'Bodeguero');
+INSERT IGNORE INTO roles (id, nombre, descripcion) VALUES
+ (1,'Administrador','Acceso total: productos, bodegas, usuarios y reportes'),
+ (2,'Vendedor','Registra ventas y consulta el inventario'),
+ (3,'Bodeguero','Gestiona entradas, traslados y existencias');
 INSERT INTO usuarios (id, nombre, email, password, id_rol, activo) VALUES
  (1,'Administrador General','__ADMIN_EMAIL__','__HASH_ADMIN__',1,1),
  (2,'Laura Martínez','__VENDEDOR_EMAIL__','__HASH_VENDEDOR__',2,1),

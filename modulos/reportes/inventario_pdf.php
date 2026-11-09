@@ -53,8 +53,9 @@ $datos = [
 
 // Definimos las rutas de los archivos temporales
 // sys_get_temp_dir() devuelve la carpeta temporal del sistema (/tmp en Linux)
-$json_temp = sys_get_temp_dir() . '/inventario_' . time() . '.json';
-$pdf_temp  = sys_get_temp_dir() . '/inventario_' . time() . '.pdf';
+$id_temp   = uniqid();
+$json_temp = sys_get_temp_dir() . '/inventario_' . $id_temp . '.json';
+$pdf_temp  = sys_get_temp_dir() . '/inventario_' . $id_temp . '.pdf';
 
 // Guardamos los datos como JSON en el archivo temporal
 // JSON_UNESCAPED_UNICODE preserva los caracteres especiales del español (á, é, ñ, etc.)
@@ -66,7 +67,14 @@ file_put_contents($json_temp, json_encode($datos, JSON_UNESCAPED_UNICODE));
 $script_python = __DIR__ . '/../../python/reporte_inventario.py';
 
 // Escapamos las rutas para evitar problemas con espacios en nombres de archivo
-$cmd = "python3 " .
+// Localiza Python 3 en Linux o Windows (ver config/python.php)
+require_once __DIR__ . '/../../config/python.php';
+$python = ts_python_comando();
+if($python === null){
+    http_response_code(500);
+    die('No se encontró Python 3. Instálelo (y las librerías reportlab y openpyxl) o defina la variable PYTHON_BIN.');
+}
+$cmd = $python . " " .
        escapeshellarg($script_python) . " " .
        escapeshellarg($json_temp)     . " " .
        escapeshellarg($pdf_temp);

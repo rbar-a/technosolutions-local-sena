@@ -13,18 +13,14 @@ abstract class BaseTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $testPass = getenv('TS_TEST_DB_PASS');
-        if ($testPass === false || $testPass === '') {
-            throw new RuntimeException('Defina TS_TEST_DB_PASS o ejecute las pruebas con: bash ejecutar_pruebas.sh');
-        }
         self::rmdirRec(SANDBOX);
         self::copiarRec(SRC_DIR, SANDBOX);
         file_put_contents(SANDBOX . '/config/conexion.php', '<?php
-$conexion = new mysqli("127.0.0.1","ts_test",' . var_export($testPass, true) . ',"technosolutions_test",3306);
+$conexion = new mysqli("127.0.0.1","ts_test","ts_test_pw","technosolutions_test",3306);
 $conexion->set_charset("utf8");');
         @mkdir(SESS_DIR, 0777, true);
         mysqli_report(MYSQLI_REPORT_OFF);
-        self::$db = new mysqli('127.0.0.1', 'ts_test', $testPass, 'technosolutions_test', 3306);
+        self::$db = new mysqli('127.0.0.1', 'ts_test', 'ts_test_pw', 'technosolutions_test', 3306);
     }
 
     private static function rmdirRec(string $d): void
@@ -41,7 +37,7 @@ $conexion->set_charset("utf8");');
     {
         mkdir($d, 0777, true);
         foreach (scandir($o) as $f) {
-            if (in_array($f, ['.', '..', 'venv', '.git', 'local.php', '.phpunit.result.cache'], true)) { continue; }
+            if (in_array($f, ['.', '..', 'venv', '.git'], true)) { continue; }
             is_dir("$o/$f") ? self::copiarRec("$o/$f", "$d/$f") : copy("$o/$f", "$d/$f");
         }
     }

@@ -128,7 +128,7 @@ class ModulosAdminTest extends BaseTest
 
     public function test_TC36_historial_muestra_el_movimiento_registrado(): void
     {
-        $this->request('modulos/movimientos/procesar_movimiento.php', 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>9,'id_bodega_destino'=>1,'observacion'=>'lote-xyz'], $this->sesion(1));
+        $this->request('modulos/movimientos/procesar_movimiento.php', 'POST', ['tipo'=>'entrada','id_producto'=>1,'cantidad'=>9,'id_bodega_destino'=>1,'observacion'=>'lote-xyz'], $this->sesion(3));
         $r = $this->request('modulos/movimientos/historial.php', 'GET', [], $this->sesion(3));
         $this->assertStringContainsString('Mouse', $r['body']);
         $this->assertStringContainsString('lote-xyz', $r['body']);

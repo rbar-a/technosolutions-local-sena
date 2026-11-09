@@ -12,4 +12,4 @@ fi
 if command -v ss >/dev/null && ss -tln | grep -q ":$PORT "; then echo "El puerto $PORT está ocupado. Use otro: PORT=9000 bash iniciar_demo.sh"; exit 1; fi
 echo "TechnoSolutions en:  http://localhost:$PORT/     (Ctrl + C para detener)"
 command -v xdg-open >/dev/null && (sleep 1; xdg-open "http://localhost:$PORT/" >/dev/null 2>&1 &)
-exec php -S 127.0.0.1:"$PORT" -t "$DIR"
+exec php -d expose_php=0 -S 127.0.0.1:"$PORT" -t "$DIR"

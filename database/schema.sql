@@ -2,7 +2,8 @@
 -- Es idempotente: se puede ejecutar varias veces sin borrar datos. Motor InnoDB (transacciones en los movimientos).
 CREATE TABLE IF NOT EXISTS roles (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(50) NOT NULL
+  nombre VARCHAR(50) NOT NULL,
+  descripcion VARCHAR(150) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS usuarios (
