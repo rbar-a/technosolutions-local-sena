@@ -18,9 +18,12 @@
 | 14 | `database/schema.sql`, `database/seed_demo.sql.tpl`, instaladores | Se agregó `roles.descripcion` (la usa `usuarios/crear.php`); los instaladores la agregan a bases antiguas. | Depuración: aviso "Undefined array key descripcion" en el formulario de usuarios. |
 | 15 | `produccion_opcional/` | `Procfile` y `.railway.json` salen de la raíz. | El proyecto se entrega para ejecución local. |
 | 16 | `iniciar_demo.sh`, `iniciar_windows.bat` | Se inicia PHP con `expose_php=0` (no revela la tecnología en las cabeceras). | Endurecimiento básico. |
+| 17 | `config/sesion.php`, `config/conexion.php`, `modulos/auth/*` | Cookies de sesión `HttpOnly` y `SameSite=Lax`, `session_regenerate_id(true)` al iniciar sesión, expiración por 30 minutos de inactividad y límite de 5 intentos fallidos (bloqueo de 15 minutos). | Endurecer la autenticación y reducir fijación de sesión y fuerza bruta. |
+| 18 | `config/csrf.php` y formularios/endpoints | Token anti-CSRF en todas las acciones que cambian estado. Desactivar usuario y eliminar producto pasan de `GET` a `POST` con token. | Evitar peticiones forzadas desde otros sitios. |
+| 19 | `modulos/movimientos/procesar_movimiento.php` | Validación de rol por tipo de movimiento (entrada/traslado: Administrador o Bodeguero; salida: todos) y actualización de stock atómica con `WHERE cantidad >= ?`. | Corrige H02 y evita stock negativo por operaciones simultáneas. |
+| 20 | `modulos/movimientos/procesar_movimiento.php`, `modulos/productos/procesar.php`, reportes PDF/Excel | Los detalles técnicos de los errores se escriben en el log; al navegador se muestra un mensaje genérico. | No exponer rutas, consultas ni trazas internas. |
 
 ## Pendiente (decisión del equipo, no se modificó)
-- **H02:** un Vendedor puede registrar entradas; el servidor no valida el rol en ese script. Requiere definir la regla de negocio.
-- Acciones por GET sin token anti-CSRF (desactivar usuario, eliminar producto).
 - El servidor integrado de PHP (`php -S`) es apto para demostración local, no para producción.
 - Los archivos `.bat` de Windows no se ejecutaron en un equipo Windows (la lógica de base de datos y la detección de Python sí se probaron en Linux).
+- El límite de intentos de login es por sesión; para producción conviene complementarlo con límite por IP/usuario a nivel de servidor.

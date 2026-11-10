@@ -17,12 +17,16 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 // Solo aceptamos método POST (datos enviados desde el formulario)
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     header('Location: lista.php');
     exit();
 }
+
+// Validación del token anti-CSRF.
+ts_csrf_validar();
 
 // ── RECIBIR Y LIMPIAR DATOS ──────────────────────────────────────────────────
 $accion       = $_POST['accion'];           // 'crear' o 'editar'
@@ -128,9 +132,11 @@ try {
     }
 
 } catch(Exception $e) {
-    // Si ocurre cualquier error inesperado, deshacemos todos los cambios
+    // Si ocurre cualquier error inesperado, deshacemos todos los cambios.
+    // El detalle se registra en el log; al usuario se le muestra un mensaje genérico.
     $conexion->rollback();
-    // En producción no deberías mostrar el error real, pero para desarrollo es útil
-    die("Error al procesar: " . $e->getMessage());
+    error_log('TechnoSolutions: error al procesar producto: ' . $e->getMessage());
+    header('Location: lista.php?error=servidor');
+    exit();
 }
 ?>

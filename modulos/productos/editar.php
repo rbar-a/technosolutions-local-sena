@@ -14,6 +14,7 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 $id = intval($_GET['id']);
 
@@ -155,6 +156,7 @@ while($bs = $stocks_bodega->fetch_assoc()){
                 <div class="form-card p-4">
 
                     <form action="procesar.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <input type="hidden" name="accion" value="editar">
                         <input type="hidden" name="id" value="<?php echo $producto['id']; ?>">
 

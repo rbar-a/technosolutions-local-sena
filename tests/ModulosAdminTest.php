@@ -52,13 +52,13 @@ class ModulosAdminTest extends BaseTest
 
     public function test_TC25_admin_desactiva_a_otro_usuario(): void
     {
-        $this->request('modulos/usuarios/toggle_estado.php?id=2', 'GET', [], $this->sesion(1));
+        $this->request('modulos/usuarios/toggle_estado.php', 'POST', ['id' => 2], $this->sesion(1));
         $this->assertSame('0', $this->usuario('vende@t.co')['activo']);
     }
 
     public function test_TC26_admin_no_puede_desactivarse_a_si_mismo(): void
     {
-        $this->request('modulos/usuarios/toggle_estado.php?id=1', 'GET', [], $this->sesion(1));
+        $this->request('modulos/usuarios/toggle_estado.php', 'POST', ['id' => 1], $this->sesion(1));
         $this->assertSame('1', $this->usuario('admin@t.co')['activo']);
     }
 
@@ -84,7 +84,7 @@ class ModulosAdminTest extends BaseTest
 
     public function test_TC30_eliminar_producto_es_baja_logica_y_conserva_la_fila(): void
     {
-        $r = $this->request('modulos/productos/eliminar.php?id=1', 'GET', [], $this->sesion(1));
+        $r = $this->request('modulos/productos/eliminar.php', 'POST', ['id' => 1], $this->sesion(1));
         $this->assertSame('lista.php?exito=eliminado', $r['location']);
         $this->assertSame('0', self::$db->query('SELECT activo FROM productos WHERE id=1')->fetch_assoc()['activo']);
         $this->assertSame(1, $this->contar('productos'));
@@ -92,7 +92,7 @@ class ModulosAdminTest extends BaseTest
 
     public function test_TC31_no_administrador_no_puede_eliminar_productos(): void
     {
-        $this->request('modulos/productos/eliminar.php?id=1', 'GET', [], $this->sesion(2));
+        $this->request('modulos/productos/eliminar.php', 'POST', ['id' => 1], $this->sesion(2));
         $this->assertSame('1', self::$db->query('SELECT activo FROM productos WHERE id=1')->fetch_assoc()['activo']);
     }
 

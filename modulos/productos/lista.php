@@ -17,6 +17,7 @@ if(!isset($_SESSION['usuario'])){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 // ── BÚSQUEDA DE PRODUCTOS ────────────────────────────────────────────────────
 // Verificamos si el usuario envió un término de búsqueda (por teclado o pistola)
@@ -375,11 +376,15 @@ $productos = $stmt->get_result();
                                 <?php endif; ?>
                                 <!-- Botón desactivar (solo para administradores) -->
                                 <?php if($_SESSION['rol'] == 1): ?>
-                                <button onclick="confirmarEliminar(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['nombre']); ?>')"
-                                        class="btn btn-sm btn-outline-danger"
-                                        title="Desactivar producto">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                <form method="POST" action="eliminar.php" class="d-inline form-eliminar"
+                                      data-nombre="<?php echo htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo ts_csrf_campo(); ?>
+                                    <input type="hidden" name="id" value="<?php echo (int) $p['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            title="Desactivar producto">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -411,20 +416,17 @@ $productos = $stmt->get_result();
 <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
 /**
- * FUNCIÓN: confirmarEliminar()
- * QUÉ HACE: Muestra una confirmación antes de desactivar un producto.
- *           Evita que se eliminen productos por error.
- * PARÁMETROS:
- *   - id: el ID del producto en la base de datos
- *   - nombre: el nombre del producto para mostrarlo en el mensaje
+ * Confirmación antes de desactivar un producto.
+ * La baja se envía por POST con token anti-CSRF (formulario oculto).
  */
-function confirmarEliminar(id, nombre) {
-    // confirm() muestra un cuadro de diálogo con Aceptar/Cancelar
-    if(confirm('¿Estás seguro de desactivar el producto "' + nombre + '"?\nNo se eliminará, solo quedará inactivo.')) {
-        // Si el usuario acepta, redirigimos al archivo que hace la eliminación
-        window.location.href = 'eliminar.php?id=' + id;
-    }
-}
+document.querySelectorAll('.form-eliminar').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var nombre = form.dataset.nombre || 'este producto';
+        if (!confirm('¿Estás seguro de desactivar el producto "' + nombre + '"?\nNo se eliminará, solo quedará inactivo.')) {
+            e.preventDefault();
+        }
+    });
+});
 
 /**
  * FUNCIÓN: autoFocusBusqueda()

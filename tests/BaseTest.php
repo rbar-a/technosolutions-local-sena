@@ -60,6 +60,12 @@ $conexion->set_charset("utf8");');
     protected function request(string $script, string $method = 'POST', array $post = [], ?array $session = null): array
     {
         [$script, $query] = array_pad(explode('?', $script, 2), 2, '');
+        // Los endpoints que cambian estado exigen token anti-CSRF.
+        if ($method === 'POST') {
+            $post['csrf_token'] = 'test-csrf';
+            $session = $session ?? [];
+            $session['csrf_token'] = 'test-csrf';
+        }
         $body = http_build_query($post);
         $env = [
             'REDIRECT_STATUS' => '1', 'REQUEST_METHOD' => $method,

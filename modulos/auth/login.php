@@ -7,8 +7,10 @@
  * AUTOR: TechnoSolutions Colombia - SENA ADSO
  */
 
-// Iniciamos la sesión para poder leer y escribir variables de sesión.
-session_start();
+// Iniciamos la sesión con cookies endurecidas.
+require_once '../../config/sesion.php';
+ts_iniciar_sesion();
+require_once '../../config/csrf.php';
 
 // Si el usuario ya tiene sesión activa, no tiene sentido mostrarle el login.
 // Lo redirigimos directo al dashboard.
@@ -128,6 +130,10 @@ if(isset($_SESSION['usuario'])){
                         echo 'Usuario o contraseña incorrectos.';
                     if($_GET['error'] == 'inactivo')     
                         echo 'Tu cuenta está desactivada. Contacta al administrador.';
+                    if($_GET['error'] == 'bloqueado')
+                        echo 'Demasiados intentos fallidos. Espera 15 minutos e inténtalo de nuevo.';
+                    if($_GET['error'] == 'expirada')
+                        echo 'Tu sesión expiró por inactividad. Inicia sesión de nuevo.';
                 ?>
                 <!-- Botón X para cerrar la alerta -->
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -156,6 +162,7 @@ if(isset($_SESSION['usuario'])){
                 method="POST": los datos viajan de forma segura (no aparecen en la URL).
             -->
             <form action="procesar_login.php" method="POST">
+                <?php echo ts_csrf_campo(); ?>
 
                 <!-- Campo de correo electrónico -->
                 <div class="mb-3">

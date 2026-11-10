@@ -21,6 +21,7 @@ if($_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 // Traemos todos los usuarios con el nombre de su rol
 $sql = "SELECT u.*, r.nombre as rol_nombre
@@ -232,11 +233,16 @@ $usuarios = $conexion->query($sql);
                                 // No permitimos desactivar el propio usuario logueado
                                 if($u['id'] != $_SESSION['usuario']):
                                 ?>
-                                <button onclick="confirmar(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['nombre']); ?>', <?php echo $u['activo']; ?>)"
-                                        class="btn btn-sm <?php echo $u['activo'] ? 'btn-outline-danger' : 'btn-outline-success'; ?>"
-                                        title="<?php echo $u['activo'] ? 'Desactivar' : 'Activar'; ?>">
-                                    <i class="bi bi-<?php echo $u['activo'] ? 'person-x' : 'person-check'; ?>"></i>
-                                </button>
+                                <form method="POST" action="toggle_estado.php" class="d-inline form-toggle"
+                                      data-nombre="<?php echo htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                                      data-activo="<?php echo $u['activo'] ? '1' : '0'; ?>">
+                                    <?php echo ts_csrf_campo(); ?>
+                                    <input type="hidden" name="id" value="<?php echo (int) $u['id']; ?>">
+                                    <button type="submit" class="btn btn-sm <?php echo $u['activo'] ? 'btn-outline-danger' : 'btn-outline-success'; ?>"
+                                            title="<?php echo $u['activo'] ? 'Desactivar' : 'Activar'; ?>">
+                                        <i class="bi bi-<?php echo $u['activo'] ? 'person-x' : 'person-check'; ?>"></i>
+                                    </button>
+                                </form>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -250,12 +256,19 @@ $usuarios = $conexion->query($sql);
 
 <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-function confirmar(id, nombre, activo) {
-    const accion = activo ? 'desactivar' : 'activar';
-    if(confirm(`¿Estás seguro de ${accion} al usuario "${nombre}"?`)) {
-        window.location.href = `toggle_estado.php?id=${id}`;
-    }
-}
+/**
+ * Confirmación antes de activar/desactivar un usuario.
+ * La acción se envía por POST con token anti-CSRF (formulario oculto).
+ */
+document.querySelectorAll('.form-toggle').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var nombre = form.dataset.nombre || 'este usuario';
+        var accion = form.dataset.activo === '1' ? 'desactivar' : 'activar';
+        if (!confirm('¿Estás seguro de ' + accion + ' al usuario "' + nombre + '"?')) {
+            e.preventDefault();
+        }
+    });
+});
 </script>
 </body>
 </html>

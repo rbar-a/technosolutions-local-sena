@@ -7,6 +7,7 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 $id = intval($_GET['id']);
 
@@ -118,6 +119,7 @@ if(!$bodega){
                     </h6>
 
                     <form action="procesar_bodega.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <input type="hidden" name="accion" value="editar">
                         <input type="hidden" name="id" value="<?php echo $bodega['id']; ?>">
 

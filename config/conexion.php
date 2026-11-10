@@ -13,6 +13,24 @@
 // Zona horaria de Colombia para fechas y horas mostradas en pantalla.
 date_default_timezone_set('America/Bogota');
 
+// ── CONTROL DE SESIÓN ────────────────────────────────────────────────────────
+// Cierra la sesión tras 30 minutos de inactividad. Se hace aquí porque este
+// archivo lo incluyen todas las páginas protegidas, antes de mostrar HTML.
+require_once __DIR__ . '/sesion.php';
+if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['usuario'])) {
+    if (ts_sesion_expirada(30)) {
+        ts_cerrar_sesion_actual();
+        if (basename($_SERVER['SCRIPT_NAME'] ?? '') === 'buscar_producto.php') {
+            header('Content-Type: application/json');
+            echo json_encode(['encontrado' => false, 'error' => 'sesion_expirada']);
+            exit();
+        }
+        header('Location: ' . ts_url_login() . '?error=expirada');
+        exit();
+    }
+    ts_marcar_actividad();
+}
+
 $cfg = ['host' => '127.0.0.1', 'port' => 3306, 'user' => 'ts_app', 'pass' => '', 'name' => 'technosolutions_db'];
 
 $archivo_local = __DIR__ . '/local.php';

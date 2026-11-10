@@ -85,8 +85,10 @@ $resultado_python = shell_exec($cmd . " 2>&1");
 
 // ── VERIFICAR SI PYTHON GENERÓ EL PDF ────────────────────────────────────────
 if(!file_exists($pdf_temp)){
-    // El archivo no se generó: mostramos el error de Python
-    die("Error al generar el PDF. Detalle: " . $resultado_python);
+    // El detalle técnico va al log; al navegador solo un mensaje genérico.
+    error_log('TechnoSolutions: error al generar PDF: ' . (string) $resultado_python);
+    http_response_code(500);
+    die('No se pudo generar el PDF. Verifica que Python y la librería reportlab estén instalados.');
 }
 
 // ── ENVIAR EL PDF AL NAVEGADOR ────────────────────────────────────────────────

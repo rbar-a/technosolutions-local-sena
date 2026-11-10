@@ -74,6 +74,11 @@ También puedes definir las credenciales antes de instalar con las variables `AD
 - Las contraseñas se almacenan con `password_hash()` (bcrypt) y se verifican con `password_verify()`.
 - Las consultas usan *prepared statements* para evitar inyección SQL.
 - Las salidas se escapan con `htmlspecialchars()` para mitigar XSS.
+- **Token anti-CSRF** en todas las acciones que cambian estado; las bajas/activaciones usan `POST`.
+- **Sesiones endurecidas**: cookies `HttpOnly`/`SameSite=Lax`, `session_regenerate_id()` al iniciar sesión, expiración por 30 min de inactividad y bloqueo tras 5 intentos fallidos.
+- **Control de rol por movimiento**: entrada y traslado solo para Administrador/Bodeguero; salida para todos.
+- **Stock atómico**: las salidas y traslados usan `WHERE cantidad >= ?` para evitar negativos por concurrencia.
+- Los errores internos se registran en el log; al navegador solo se muestra un mensaje genérico.
 
 ## Pruebas y utilidades
 
@@ -108,9 +113,8 @@ Este comando borra la base de datos y la vuelve a crear con los datos de ejemplo
 
 ## Notas y pendientes
 
-- **H02:** un Vendedor puede registrar entradas; falta definir y validar la regla de negocio por rol.
-- Algunas acciones que cambian estado usan `GET` sin token anti-CSRF (desactivar usuario, eliminar producto).
 - El servidor integrado de PHP (`php -S`) es apto para demostración local, **no para producción**.
 - Los lanzadores `.bat` de Windows no se ejecutaron en un equipo Windows (la lógica de base de datos y la detección de Python sí se probaron en Linux).
+- El límite de intentos de login es por sesión; para producción conviene complementarlo con un límite por IP/usuario a nivel de servidor.
 
 El detalle de los cambios respecto al proyecto original está en [`CAMBIOS.md`](CAMBIOS.md) y la guía local extendida en [`README_LOCAL.md`](README_LOCAL.md).

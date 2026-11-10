@@ -16,6 +16,7 @@ if(!isset($_SESSION['usuario'])){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 $bodegas = $conexion->query(
     "SELECT * FROM bodegas WHERE activa = 1 ORDER BY nombre"
@@ -174,6 +175,10 @@ while($b = $bodegas->fetch_assoc()){
                             echo 'La bodega origen y destino no pueden ser la misma.';
                         if($_GET['error'] == 'campos_vacios')
                             echo 'Completa todos los campos obligatorios.';
+                        if($_GET['error'] == 'sin_permiso')
+                            echo 'Tu rol no tiene permiso para registrar este tipo de movimiento.';
+                        if($_GET['error'] == 'servidor')
+                            echo 'No se pudo completar la operación. Inténtalo de nuevo.';
                     ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -186,6 +191,7 @@ while($b = $bodegas->fetch_assoc()){
                     </h6>
 
                     <form action="procesar_movimiento.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <input type="hidden" name="tipo" value="traslado">
 
                         <!-- Paso 1: Producto -->

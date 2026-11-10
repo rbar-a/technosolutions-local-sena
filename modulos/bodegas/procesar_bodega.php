@@ -7,11 +7,15 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     header('Location: lista.php');
     exit();
 }
+
+// Validación del token anti-CSRF.
+ts_csrf_validar();
 
 $accion    = $_POST['accion'];
 $nombre    = trim($_POST['nombre']);

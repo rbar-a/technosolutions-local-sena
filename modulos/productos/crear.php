@@ -24,6 +24,7 @@ if($_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 // Traemos las bodegas para el selector de stock inicial
 $bodegas = $conexion->query("SELECT * FROM bodegas WHERE activa = 1 ORDER BY nombre");
@@ -173,6 +174,7 @@ $bodegas = $conexion->query("SELECT * FROM bodegas WHERE activa = 1 ORDER BY nom
                         method="POST": datos viajan de forma segura
                     -->
                     <form action="procesar.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <!-- Campo oculto que indica la acción a realizar -->
                         <!-- procesar.php usa este campo para saber si es crear o editar -->
                         <input type="hidden" name="accion" value="crear">

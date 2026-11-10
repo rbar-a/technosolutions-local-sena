@@ -13,6 +13,7 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 $roles = $conexion->query("SELECT * FROM roles ORDER BY id");
 ?>
 <!DOCTYPE html>
@@ -145,6 +146,7 @@ $roles = $conexion->query("SELECT * FROM roles ORDER BY id");
                     </h6>
 
                     <form action="procesar_usuario.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <input type="hidden" name="accion" value="crear">
 
                         <div class="mb-3">

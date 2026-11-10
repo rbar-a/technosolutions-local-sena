@@ -14,8 +14,17 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
-$id = intval($_GET['id']);
+// Solo POST: activar/desactivar ya no se ejecuta por GET (evita CSRF).
+if($_SERVER['REQUEST_METHOD'] !== 'POST'){
+    header('Location: lista.php');
+    exit();
+}
+
+ts_csrf_validar();
+
+$id = intval($_POST['id'] ?? 0);
 
 // No permitimos que el administrador se desactive a sí mismo
 if($id === intval($_SESSION['usuario'])){

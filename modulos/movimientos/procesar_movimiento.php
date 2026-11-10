@@ -20,11 +20,15 @@ if(!isset($_SESSION['usuario'])){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     header('Location: ../dashboard.php');
     exit();
 }
+
+// Validación del token anti-CSRF.
+ts_csrf_validar();
 
 // ── RECIBIR DATOS ────────────────────────────────────────────────────────────
 $tipo        = $_POST['tipo'] ?? '';     // 'entrada', 'salida' o 'traslado'
@@ -32,6 +36,19 @@ $tipo        = $_POST['tipo'] ?? '';     // 'entrada', 'salida' o 'traslado'
 // Validación en lista blanca: un tipo desconocido se rechaza (evita pantalla en blanco y redirecciones arbitrarias).
 if(!in_array($tipo, ['entrada', 'salida', 'traslado'], true)){
     header('Location: ../dashboard.php');
+    exit();
+}
+
+// ── CONTROL DE ROL POR TIPO DE MOVIMIENTO ────────────────────────────────────
+// Administrador (1) y Bodeguero (3) gestionan entradas y traslados.
+// El Vendedor (2) solo puede registrar salidas (ventas). Corrige H02.
+$roles_permitidos = [
+    'entrada'  => [1, 3],
+    'salida'   => [1, 2, 3],
+    'traslado' => [1, 3],
+];
+if(!in_array((int) $_SESSION['rol'], $roles_permitidos[$tipo], true)){
+    header("Location: {$tipo}.php?error=sin_permiso");
     exit();
 }
 $id_producto = intval($_POST['id_producto']);
@@ -104,28 +121,20 @@ try {
     // ════════════════════════════════════════════════════════════════════════
     elseif($tipo === 'salida'){
 
-        // Verificamos el stock disponible en la bodega origen
-        $sql_check = "SELECT cantidad FROM stock_bodega
-                      WHERE id_producto = ? AND id_bodega = ?";
-        $stmt_check = $conexion->prepare($sql_check);
-        $stmt_check->bind_param("ii", $id_producto, $id_bodega_origen);
-        $stmt_check->execute();
-        $res_check = $stmt_check->get_result()->fetch_assoc();
+        // Restamos de forma atómica: la condición cantidad >= ? evita que dos
+        // salidas simultáneas dejen el stock negativo (condición de carrera).
+        $sql = "UPDATE stock_bodega
+                SET cantidad = cantidad - ?
+                WHERE id_producto = ? AND id_bodega = ? AND cantidad >= ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("iiii", $cantidad, $id_producto, $id_bodega_origen, $cantidad);
+        $stmt->execute();
 
-        // Si no hay registro o el stock es insuficiente, cancelamos
-        if(!$res_check || $res_check['cantidad'] < $cantidad){
+        if($stmt->affected_rows === 0){
             $conexion->rollback();
             header('Location: salida.php?error=stock_insuficiente');
             exit();
         }
-
-        // Restamos el stock de la bodega
-        $sql = "UPDATE stock_bodega
-                SET cantidad = cantidad - ?
-                WHERE id_producto = ? AND id_bodega = ?";
-        $stmt = $conexion->prepare($sql);
-        $stmt->bind_param("iii", $cantidad, $id_producto, $id_bodega_origen);
-        $stmt->execute();
 
         // Registramos en el historial
         $sql_mov = "INSERT INTO movimientos
@@ -160,27 +169,20 @@ try {
             exit();
         }
 
-        // Verificamos stock en la bodega origen
-        $sql_check = "SELECT cantidad FROM stock_bodega
-                      WHERE id_producto = ? AND id_bodega = ?";
-        $stmt_check = $conexion->prepare($sql_check);
-        $stmt_check->bind_param("ii", $id_producto, $id_bodega_origen);
-        $stmt_check->execute();
-        $res_check = $stmt_check->get_result()->fetch_assoc();
+        // Restamos de la bodega origen de forma atómica (evita stock negativo
+        // si dos traslados/salidas se ejecutan a la vez).
+        $sql_resta = "UPDATE stock_bodega
+                      SET cantidad = cantidad - ?
+                      WHERE id_producto = ? AND id_bodega = ? AND cantidad >= ?";
+        $stmt_resta = $conexion->prepare($sql_resta);
+        $stmt_resta->bind_param("iiii", $cantidad, $id_producto, $id_bodega_origen, $cantidad);
+        $stmt_resta->execute();
 
-        if(!$res_check || $res_check['cantidad'] < $cantidad){
+        if($stmt_resta->affected_rows === 0){
             $conexion->rollback();
             header('Location: traslado.php?error=stock_insuficiente');
             exit();
         }
-
-        // Restamos de la bodega origen
-        $sql_resta = "UPDATE stock_bodega
-                      SET cantidad = cantidad - ?
-                      WHERE id_producto = ? AND id_bodega = ?";
-        $stmt_resta = $conexion->prepare($sql_resta);
-        $stmt_resta->bind_param("iii", $cantidad, $id_producto, $id_bodega_origen);
-        $stmt_resta->execute();
 
         // Sumamos en la bodega destino (creamos registro si no existe)
         $sql_suma = "INSERT INTO stock_bodega (id_producto, id_bodega, cantidad)
@@ -217,8 +219,11 @@ try {
     }
 
 } catch(Exception $e) {
-    // Cualquier error inesperado: deshacemos todo
+    // Cualquier error inesperado: deshacemos todo. El detalle va al log,
+    // no al navegador, para no exponer información interna.
     $conexion->rollback();
-    die("Error al procesar movimiento: " . $e->getMessage());
+    error_log('TechnoSolutions: error al procesar movimiento: ' . $e->getMessage());
+    header("Location: {$tipo}.php?error=servidor");
+    exit();
 }
 ?>

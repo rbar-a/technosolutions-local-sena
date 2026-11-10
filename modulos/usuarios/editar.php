@@ -15,6 +15,7 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 }
 
 require_once '../../config/conexion.php';
+require_once '../../config/csrf.php';
 
 $id = intval($_GET['id']);
 
@@ -140,6 +141,7 @@ $roles = $conexion->query("SELECT * FROM roles ORDER BY id");
                     </h6>
 
                     <form action="procesar_usuario.php" method="POST">
+                        <?php echo ts_csrf_campo(); ?>
                         <input type="hidden" name="accion" value="editar">
                         <!-- ID oculto para identificar qué usuario actualizar -->
                         <input type="hidden" name="id"

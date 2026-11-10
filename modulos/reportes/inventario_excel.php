@@ -65,7 +65,10 @@ $cmd = $python . " " .
 $resultado_python = shell_exec($cmd . " 2>&1");
 
 if(!file_exists($excel_temp)){
-    die("Error al generar Excel. Detalle: " . $resultado_python);
+    // El detalle técnico va al log; al navegador solo un mensaje genérico.
+    error_log('TechnoSolutions: error al generar Excel: ' . (string) $resultado_python);
+    http_response_code(500);
+    die('No se pudo generar el Excel. Verifica que Python y la librería openpyxl estén instalados.');
 }
 
 // Cabeceras para descarga de Excel
